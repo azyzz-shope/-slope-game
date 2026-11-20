@@ -2,58 +2,71 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Slope — AZIZ</title>
+<title>SLOPE — AZIZ</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020615;color:#eafaff;font-family:Arial,Helvetica,sans-serif;touch-action:none}canvas{display:block}
-#hud{position:fixed;top:18px;left:22px;right:22px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;text-shadow:0 0 12px #00cfff;font-weight:900;letter-spacing:2px}
-#score{font-size:clamp(25px,5vw,42px)}#best{font-size:12px;color:#8cecff;text-align:right;line-height:1.8}
-#tip{position:fixed;bottom:15px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:2px;color:#91c6d5;pointer-events:none}
-#overlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,#02061577,#020615dd)}
-.panel{width:min(440px,90vw);padding:34px 25px;text-align:center;background:#06152be8;border:1px solid #00cfff88;box-shadow:0 0 55px #00bfff22;border-radius:4px}
-h1{font-size:clamp(48px,12vw,76px);letter-spacing:10px;margin:0;color:#f2ffff;text-shadow:0 0 25px #00cfff}
-p{color:#b6dce9;line-height:1.7;font-size:14px}button{margin-top:10px;background:#00dfff;color:#001018;border:0;padding:14px 34px;font-weight:900;letter-spacing:3px;cursor:pointer}
-#mobile{position:fixed;bottom:44px;left:0;right:0;display:none;justify-content:space-between;padding:0 24px;pointer-events:none}
-#mobile button{pointer-events:auto;margin:0;width:70px;height:58px;padding:0;font-size:24px;background:#00dfff55;border:1px solid #00dfff;color:white;border-radius:8px}
-@media(pointer:coarse){#mobile{display:flex}#tip{bottom:112px}}
-</style>
-</head>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070914;color:#fff;font-family:Arial,sans-serif;touch-action:none}canvas{display:block}
+#hud{position:fixed;top:18px;left:22px;right:22px;display:flex;justify-content:space-between;pointer-events:none;text-shadow:0 0 12px #00d9ff;font-weight:900;letter-spacing:2px}#score{font-size:clamp(28px,6vw,46px)}#best{font-size:12px;text-align:right;line-height:1.8;color:#9bdcff}
+#tip{position:fixed;bottom:17px;left:0;right:0;text-align:center;color:#9cb6ce;font-size:11px;letter-spacing:2px;pointer-events:none}
+#overlay{position:fixed;inset:0;display:grid;place-items:center;background:#050817b8}.panel{width:min(440px,90vw);padding:34px 24px;text-align:center;background:#0a1024ee;border:1px solid #00d9ff88;box-shadow:0 0 60px #00bfff25}h1{font-size:clamp(55px,13vw,82px);letter-spacing:10px;margin:0;color:#fff;text-shadow:0 0 24px #00d9ff}p{color:#b5c9e2;line-height:1.7;font-size:14px}button{margin-top:12px;background:#f51d4d;color:white;border:0;padding:15px 38px;font-weight:900;letter-spacing:3px;cursor:pointer}
+#mobile{position:fixed;bottom:48px;left:0;right:0;display:none;justify-content:space-between;padding:0 22px;pointer-events:none}#mobile button{pointer-events:auto;margin:0;width:72px;height:60px;padding:0;font-size:27px;background:#091b36aa;border:1px solid #00d9ff;color:#fff;border-radius:5px}
+@media(pointer:coarse){#mobile{display:flex}#tip{bottom:120px}}
+</style></head>
 <body>
-<div id="hud"><div id="score">0</div><div id="best">BEST SCORE<br><span id="bestv">0</span></div></div>
-<div id="overlay"><div class="panel"><h1 id="heading">SLOPE</h1><p id="message">Roll through the neon track.<br>Dodge the red blocks and don't fall off!</p><button id="start">PLAY NOW</button><p style="font-size:10px;letter-spacing:2px;margin-bottom:0">AZIZ • 3D ARCADE</p></div></div>
-<div id="tip">MOVE: A / D OR ← / →</div>
-<div id="mobile"><button id="left">‹</button><button id="right">›</button></div>
+<div id="hud"><div id="score">0</div><div id="best">BEST<br><span id="bestv">0</span></div></div>
+<div id="overlay"><div class="panel"><h1 id="heading">SLOPE</h1><p id="message">Keep rolling. Dodge the red blocks and stay on the track.</p><button id="start">PLAY</button><p style="font-size:10px;letter-spacing:2px">AZIZ • ARCADE REBUILD</p></div></div>
+<div id="tip">MOVE WITH A / D OR ← / →</div><div id="mobile"><button id="left">‹</button><button id="right">›</button></div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-(()=>{
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x020615);scene.fog=new THREE.FogExp2(0x020615,.012);
-const camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,220);camera.position.set(0,7,12);
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0x8bdfff,0x080b22,1.5));const keyLight=new THREE.PointLight(0x00cfff,2.2,45);keyLight.position.set(0,8,3);scene.add(keyLight);
-const ballMat=new THREE.MeshStandardMaterial({color:0x39ff82,emissive:0x087a37,emissiveIntensity:1.1,metalness:.25,roughness:.22});
-const ball=new THREE.Mesh(new THREE.SphereGeometry(.43,32,24),ballMat);ball.position.set(0,.52,3);scene.add(ball);
-const trackMat=new THREE.MeshStandardMaterial({color:0x101e39,metalness:.5,roughness:.35});
-const glowMat=new THREE.MeshBasicMaterial({color:0x00bfff});
-const redMat=new THREE.MeshStandardMaterial({color:0xff234f,emissive:0x8b001f,emissiveIntensity:1.15,metalness:.25,roughness:.25});
-const segments=[],obstacles=[],stars=[];
-function makeSegment(z){const g=new THREE.Group();const floor=new THREE.Mesh(new THREE.BoxGeometry(9,.22,22),trackMat);floor.position.y=-.12;g.add(floor);for(const x of [-4.53,4.53]){const rail=new THREE.Mesh(new THREE.BoxGeometry(.09,.1,22),glowMat);rail.position.set(x,.04,0);g.add(rail)}for(let i=0;i<5;i++){const line=new THREE.Mesh(new THREE.BoxGeometry(.035,.012,1.5),new THREE.MeshBasicMaterial({color:0x246080}));line.position.set(0,.002,-8+i*4);g.add(line)}g.position.z=z;scene.add(g);segments.push(g)}
-for(let i=0;i<8;i++)makeSegment(-i*22-5);
-const starGeo=new THREE.BufferGeometry();const starPos=[];for(let i=0;i<500;i++)starPos.push((Math.random()-.5)*180,Math.random()*75-5,-Math.random()*200);starGeo.setAttribute('position',new THREE.Float32BufferAttribute(starPos,3));const starField=new THREE.Points(starGeo,new THREE.PointsMaterial({color:0x9bdfff,size:.22}));scene.add(starField);
-let score=0,best=Number(localStorage.getItem('azSlopeBest')||0),speed=23,playing=false,last=0,spawn=0,px=0,steer=0;
-const scoreEl=document.getElementById('score'),bestEl=document.getElementById('bestv'),overlay=document.getElementById('overlay'),heading=document.getElementById('heading'),message=document.getElementById('message'),start=document.getElementById('start');bestEl.textContent=best;
-function addObstacle(){const lane=(Math.floor(Math.random()*5)-2)*1.65;const w=1.15+Math.random()*.35;const h=1.25+Math.random()*.35;const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,1.1),redMat);m.position.set(lane,h/2,-105);m.userData.w=w;scene.add(m);obstacles.push(m)}
-function startGame(){obstacles.forEach(o=>scene.remove(o));obstacles.length=0;score=0;speed=23;spawn=.6;px=0;ball.position.set(0,.52,3);ball.rotation.set(0,0,0);segments.forEach((s,i)=>s.position.z=-i*22-5);playing=true;overlay.style.display='none';last=performance.now();requestAnimationFrame(loop)}
-function gameOver(){playing=false;best=Math.max(best,Math.floor(score));localStorage.setItem('azSlopeBest',best);bestEl.textContent=best;heading.textContent='GAME OVER';message.innerHTML='YOUR SCORE: '+Math.floor(score)+'<br>Best score: '+best;start.textContent='TRY AGAIN';overlay.style.display='grid'}
-start.addEventListener('click',startGame);
-const keys={};addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if(k.startsWith('arrow')||k===' ')e.preventDefault();if(keys.r&&keys.j&&playing){score+=1000;keys.r=keys.j=false}});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-function hold(btn,dir){btn.addEventListener('pointerdown',e=>{e.preventDefault();steer=dir});btn.addEventListener('pointerup',()=>{if(steer===dir)steer=0});btn.addEventListener('pointerleave',()=>{if(steer===dir)steer=0})}hold(document.getElementById('left'),-1);hold(document.getElementById('right'),1);
-function loop(t){if(!playing)return;const dt=Math.min((t-last)/1000,.04);last=t;score+=dt*12;speed=Math.min(47,23+score*.018);const left=keys.a||keys.arrowleft||steer<0,right=keys.d||keys.arrowright||steer>0;if(left)px-=dt*11;if(right)px+=dt*11;px=THREE.MathUtils.clamp(px,-5.4,5.4);ball.position.x+=(px-ball.position.x)*Math.min(1,dt*12);ball.rotation.z+=(ball.position.x-px)*dt*2;ball.rotation.x-=dt*speed/1.4;
-for(const s of segments){s.position.z+=speed*dt;if(s.position.z>18)s.position.z-=176}
-if(Math.abs(ball.position.x)>4.75){gameOver();return}
-spawn-=dt;if(spawn<=0){addObstacle();spawn=Math.max(.48,1.18-(speed-23)*.022)}
-for(let i=obstacles.length-1;i>=0;i--){const o=obstacles[i];o.position.z+=speed*dt;if(Math.abs(o.position.z-ball.position.z)<.85&&Math.abs(o.position.x-ball.position.x)<o.userData.w/2+.38){gameOver();return}if(o.position.z>12){scene.remove(o);obstacles.splice(i,1)}}
-camera.position.x+=(ball.position.x*.22-camera.position.x)*dt*2.2;camera.position.y=6.5+Math.sin(t*.001)*.12;camera.lookAt(ball.position.x*.2,.1,-10);scoreEl.textContent=Math.floor(score);renderer.render(scene,camera);requestAnimationFrame(loop)}
-function idle(){renderer.render(scene,camera);requestAnimationFrame(idle)}idle();
+(()=> {
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x080a18);scene.fog=new THREE.Fog(0x080a18,32,145);
+const camera=new THREE.PerspectiveCamera(67,innerWidth/innerHeight,.1,240);camera.position.set(0,7.5,12);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xa7caff,0x171020,1.5));const light=new THREE.DirectionalLight(0xffffff,1.1);light.position.set(-4,12,8);scene.add(light);
+const red=new THREE.MeshStandardMaterial({color:0xff254e,emissive:0xa50028,emissiveIntensity:1.05,roughness:.27,metalness:.18});
+const floorMat=new THREE.MeshStandardMaterial({color:0x151a31,roughness:.55,metalness:.25});
+const edgeMat=new THREE.MeshBasicMaterial({color:0x00cfff});
+const ballMat=new THREE.MeshStandardMaterial({color:0xff263f,emissive:0xd40028,emissiveIntensity:1.45,roughness:.2,metalness:.2});
+const ball=new THREE.Mesh(new THREE.SphereGeometry(.43,32,24),ballMat);ball.position.set(0,.48,4);scene.add(ball);
+const ballGlow=new THREE.PointLight(0xff244a,1.4,9);ball.add(ballGlow);
+const segments=[];const segmentLength=20;let nextX=0,nextYaw=0;
+function buildSegment(z,x,yaw){
+ const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=yaw;g.userData={gap:false,obs:[]};
+ if(Math.random()<.13){g.userData.gap=true}else{
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(8.2,.32,segmentLength),floorMat);deck.position.y=-.18;g.add(deck);
+ }
+ for(const side of [-1,1]){const rail=new THREE.Mesh(new THREE.BoxGeometry(.1,.12,segmentLength),edgeMat);rail.position.set(side*4.12,.02,0);g.add(rail)}
+ for(let k=0;k<4;k++){const stripe=new THREE.Mesh(new THREE.BoxGeometry(.035,.015,.9),new THREE.MeshBasicMaterial({color:0x33415e}));stripe.position.set(0,.0,-8+k*5);g.add(stripe)}
+ if(!g.userData.gap && Math.random()<.78){
+  const count=Math.random()<.3?2:1;const used=[];
+  for(let j=0;j<count;j++){let lane=(Math.floor(Math.random()*5)-2)*1.45;if(used.some(v=>Math.abs(v-lane)<1.2))lane+=1.4;used.push(lane);
+   const h=1.15+Math.random()*.6,w=1.0+Math.random()*.35;const block=new THREE.Mesh(new THREE.BoxGeometry(w,h,1.05),red);block.position.set(lane,h/2,-2-Math.random()*10);block.userData={lane,w};g.add(block);g.userData.obs.push(block);
+  }
+ }
+ scene.add(g);segments.push(g);return g;
+}
+for(let i=0;i<9;i++){nextX+= (Math.random()-.5)*1.05;nextX=THREE.MathUtils.clamp(nextX,-2.2,2.2);nextYaw=THREE.MathUtils.clamp(nextYaw+(Math.random()-.5)*.055,-.17,.17);buildSegment(-i*segmentLength-4,nextX,nextYaw)}
+const starGeo=new THREE.BufferGeometry(),pos=[];for(let i=0;i<650;i++)pos.push((Math.random()-.5)*180,Math.random()*80-8,-Math.random()*220);starGeo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xb3dfff,size:.19})));
+let score=0,best=+(localStorage.getItem('slopeAzizBest')||0),speed=20,playing=false,last=0,steer=0,lateral=0,fall=0;
+const $=id=>document.getElementById(id);$('bestv').textContent=best;
+function startGame(){segments.forEach(s=>scene.remove(s));segments.length=0;nextX=0;nextYaw=0;for(let i=0;i<9;i++){nextX=THREE.MathUtils.clamp(nextX+(Math.random()-.5)*1.05,-2.2,2.2);nextYaw=THREE.MathUtils.clamp(nextYaw+(Math.random()-.5)*.055,-.17,.17);buildSegment(-i*segmentLength-4,nextX,nextYaw)}score=0;speed=20;lateral=0;fall=0;ball.position.set(0,.48,4);ball.rotation.set(0,0,0);playing=true;$('overlay').style.display='none';last=performance.now();requestAnimationFrame(loop)}
+function endGame(){playing=false;best=Math.max(best,Math.floor(score));localStorage.setItem('slopeAzizBest',best);$('bestv').textContent=best;$('heading').textContent='GAME OVER';$('message').innerHTML='SCORE: '+Math.floor(score)+'<br>BEST: '+best;$('start').textContent='PLAY AGAIN';$('overlay').style.display='grid'}
+$('start').addEventListener('click',startGame);
+const keys={};addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if(k.includes('arrow')||k===' ')e.preventDefault();if(keys.r&&keys.j&&playing){score+=1000;keys.r=keys.j=false}});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+function hold(id,d){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();steer=d});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>{if(steer===d)steer=0}))}hold('left',-1);hold('right',1);
+function currentSegment(){let found=null;for(const s of segments)if(s.position.z<=4+segmentLength/2&&s.position.z>=4-segmentLength/2){found=s;break}return found}
+function loop(t){if(!playing)return;const dt=Math.min((t-last)/1000,.035);last=t;score+=dt*13;speed=Math.min(48,20+score*.022);
+ const dir=(keys.a||keys.arrowleft||steer<0?-1:0)+(keys.d||keys.arrowright||steer>0?1:0);lateral=THREE.MathUtils.clamp(lateral+dir*dt*8,-3.5,3.5);
+ for(const s of segments){s.position.z+=speed*dt;if(s.position.z>16){s.position.z-=segments.length*segmentLength;nextX=THREE.MathUtils.clamp(nextX+(Math.random()-.5)*1.45,-2.5,2.5);nextYaw=THREE.MathUtils.clamp(nextYaw+(Math.random()-.5)*.075,-.2,.2);s.position.x=nextX;s.rotation.y=nextYaw;
+   s.userData.gap=Math.random()<.13;const old=s.children.filter(c=>c.userData&&c.userData.lane!==undefined);old.forEach(c=>s.remove(c));s.userData.obs=[];
+   const deck=s.children.find(c=>c.geometry&&c.geometry.type==='BoxGeometry'&&c.geometry.parameters.width===8.2);if(s.userData.gap&&deck)s.remove(deck);if(!s.userData.gap&&!deck){const d=new THREE.Mesh(new THREE.BoxGeometry(8.2,.32,segmentLength),floorMat);d.position.y=-.18;s.add(d)}
+   if(!s.userData.gap&&Math.random()<.78){const count=Math.random()<.3?2:1;for(let j=0;j<count;j++){const lane=(Math.floor(Math.random()*5)-2)*1.45,h=1.15+Math.random()*.6,w=1+Math.random()*.35;const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,1.05),red);b.position.set(lane,h/2,-2-Math.random()*10);b.userData={lane,w};s.add(b);s.userData.obs.push(b)}}
+  }}
+ const seg=currentSegment();if(seg){const center=seg.position.x-Math.sin(seg.rotation.y)*(4-seg.position.z);ball.position.x+=(center+lateral-ball.position.x)*Math.min(1,dt*9);if(seg.userData.gap){fall+=dt;ball.position.y=Math.max(-8,.48-fall*fall*9);if(fall>.38){endGame();return}}else{fall=0;ball.position.y=.48+Math.sin(t*.012)*.025}
+  const localX=ball.position.x-seg.position.x;if(Math.abs(localX)>3.72){endGame();return}
+  for(const b of seg.userData.obs){if(Math.abs(b.position.z-(4-seg.position.z))<.9&&Math.abs(localX-b.position.x)<b.userData.w/2+.34){endGame();return}}
+ }else{endGame();return}
+ ball.rotation.x-=dt*speed/1.3;ball.rotation.z=-dir*.18;camera.position.x+=(ball.position.x*.22-camera.position.x)*dt*2;camera.position.y=7.2;camera.lookAt(ball.position.x*.18,.1,-9);$('score').textContent=Math.floor(score);renderer.render(scene,camera);requestAnimationFrame(loop)}
+function idle(){if(!playing){renderer.render(scene,camera)}requestAnimationFrame(idle)}idle();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 })();
-</script>
-</body></html>
+</script></body></html>
